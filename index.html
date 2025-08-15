@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JAAFAR S. ENTERPRISES - Crypto Bureau de Change</title>
+<style>
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: linear-gradient(to bottom, #0f2027, #203a43, #2c5364);
+        color: white;
+        text-align: center;
+    }
+    header { padding: 20px; }
+    header h1 { font-size: 2em; margin-bottom: 5px; }
+    header p { font-size: 1.1em; margin: 5px 0; }
+    .wave { position: relative; height: 150px; background: #2c5364; }
+    .wave::before {
+        content: "";
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background: url('https://svgshare.com/i/15hW.svg') repeat-x;
+        background-size: cover;
+        top: -1px;
+    }
+    .crypto-container {
+        display: flex; flex-wrap: wrap; justify-content: center;
+        gap: 20px; padding: 20px;
+    }
+    .crypto-card {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 10px; padding: 15px; width: 250px;
+        box-shadow: 0px 4px 8px rgba(0,0,0,0.3);
+        transition: transform 0.2s ease-in-out;
+    }
+    .crypto-card:hover { transform: translateY(-5px); }
+    .crypto-card img { width: 60px; height: 60px; }
+    .converter {
+        padding: 20px; background: rgba(255, 255, 255, 0.1);
+        border-radius: 10px; max-width: 400px; margin: auto;
+    }
+    input, select, button {
+        padding: 10px; margin: 5px; width: 90%;
+        border-radius: 5px; border: none; font-size: 1em;
+    }
+    button {
+        background: #ff9800; color: white; cursor: pointer; font-weight: bold;
+    }
+    button:hover { background: #e68900; }
+    footer { padding: 15px; font-size: 0.9em; background: #1b2a38; }
+    @media (max-width: 600px) {
+        .crypto-container { flex-direction: column; align-items: center; }
+    }
+</style>
+</head>
+<body>
+
+<header>
+    <h1>JAAFAR S. ENTERPRISES</h1>
+    <p>General Merchandise | Online & Offline Payments | Bureau de Change</p>
+    <p>Phone: 08148898081 | Email: aminuhassan508@gmail.com</p>
+    <p>Address: 1068 Dandago Primary School, Gwale L.G.A Kano, Kano State</p>
+</header>
+
+<div class="wave"></div>
+
+<section class="crypto-container" id="crypto-prices"></section>
+
+<section class="converter">
+    <h2>Crypto Converter</h2>
+    <select id="crypto-select">
+        <option value="bitcoin">Bitcoin (BTC)</option>
+        <option value="ethereum">Ethereum (ETH)</option>
+        <option value="solana">Solana (SOL)</option>
+    </select>
+    <input type="number" id="crypto-amount" placeholder="Enter amount">
+    <button onclick="convertCrypto()">Convert to USD</button>
+    <p id="conversion-result"></p>
+</section>
+
+<footer>
+    &copy; 2025 JAAFAR S. ENTERPRISES - All Rights Reserved
+</footer>
+
+<script>
+    const cryptos = [
+        { id: "bitcoin", name: "Bitcoin", image: "https://cryptologos.cc/logos/bitcoin-btc-logo.png?v=025" },
+        { id: "ethereum", name: "Ethereum", image: "https://cryptologos.cc/logos/ethereum-eth-logo.png?v=025" },
+        { id: "solana", name: "Solana", image: "https://cryptologos.cc/logos/solana-sol-logo.png?v=025" }
+    ];
+
+    async function loadPrices() {
+        const res = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana&vs_currencies=usd");
+        const data = await res.json();
+        const container = document.getElementById("crypto-prices");
+        container.innerHTML = "";
+        cryptos.forEach(coin => {
+            container.innerHTML += `
+                <div class="crypto-card">
+                    <img src="${coin.image}" alt="${coin.name}">
+                    <h3>${coin.name}</h3>
+                    <p>USD $${data[coin.id].usd.toLocaleString()}</p>
+                </div>
+            `;
+        });
+    }
+
+    async function convertCrypto() {
+        const coin = document.getElementById("crypto-select").value;
+        const amount = parseFloat(document.getElementById("crypto-amount").value);
+        if (isNaN(amount) || amount <= 0) {
+            document.getElementById("conversion-result").innerText = "Please enter a valid amount.";
+            return;
+        }
+        const res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${coin}&vs_currencies=usd`);
+        const data = await res.json();
+        const price = data[coin].usd;
+        const result = amount * price;
+        document.getElementById("conversion-result").innerText = `${amount} ${coin.toUpperCase()} = USD $${result.toLocaleString()}`;
+    }
+
+    loadPrices();
+    setInterval(loadPrices, 60000);
+</script>
+
+</body>
+</html>
